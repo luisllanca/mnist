@@ -9,18 +9,23 @@ import seaborn as sns
 import pandas as pd
 from sklearn.metrics import classification_report, confusion_matrix
 
-class SimpleCNN(nn.Module):
+class ImprovedCNN(nn.Module):
     def __init__(self, num_classes):
-        super(SimpleCNN, self).__init__()
-        self.conv = nn.Conv2d(1, 64, kernel_size=3, padding=1)
+        super(ImprovedCNN, self).__init__()
+        self.conv1 = nn.Conv2d(1, 32, kernel_size=3, padding=1)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
         self.pool = nn.MaxPool2d(2, 2)
-        self.fc = nn.Linear(64 * 14 * 14, num_classes)
+        self.fc1 = nn.Linear(64 * 7 * 7, 128)
+        self.fc2 = nn.Linear(128, num_classes)
 
     def forward(self, x):
-        x = torch.relu(self.conv(x))
+        x = torch.relu(self.conv1(x))
         x = self.pool(x)
-        x = x.view(-1, 64 * 14 * 14)
-        x = self.fc(x)
+        x = torch.relu(self.conv2(x))
+        x = self.pool(x)
+        x = x.view(-1, 64 * 7 * 7)
+        x = torch.relu(self.fc1(x))
+        x = self.fc2(x)
         return x
 
 def test(model, test_images, test_labels):
@@ -70,7 +75,7 @@ def main():
     test_images = torch.load(args.test_images)
     test_labels = torch.load(args.test_labels)
 
-    model = SimpleCNN(num_classes=10)
+    model = ImprovedCNN(num_classes=10)
     model.load_state_dict(torch.load(args.model_path))
 
     test(model, test_images, test_labels)
