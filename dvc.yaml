@@ -1,0 +1,26 @@
+stages:
+  preprocessing:
+    cmd: python preprocessing.py dataset_dvc tensors
+    deps:
+    - dataset_dvc
+    - preprocessing.py
+    outs:
+    - tensors
+  train:
+    cmd: python train.py tensors/train_images.pt tensors/train_labels.pt model_trained.pt
+    deps:
+    - tensors/train_images.pt
+    - tensors/train_labels.pt
+    - train.py
+    outs:
+    - models/model_trained.pt
+  test:
+    cmd: python test.py tensors/test_images.pt tensors/test_labels.pt models/model_trained.pt
+    deps:
+    - models/model_trained.pt
+    - tensors/test_images.pt
+    - tensors/test_labels.pt
+    - test.py
+    outs:
+    - confusion_matrix.png
+    - metrics.csv
